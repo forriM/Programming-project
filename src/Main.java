@@ -12,17 +12,15 @@ public class Main {
     public static void main(String[] args) {
 
         Scanner scanner = new Scanner(System.in);
-        String mode = "";
+        String mode;
         do {
             System.out.println("Which mode do you want to play?(basic/advanced)");
             mode = scanner.nextLine();
             if(mode.equals("advanced")) {
-                System.out.println("What size of board?");
-                size = scanner.nextInt();
-                while(size>11 || size<4) {
+                do {
                     System.out.println("What size of board?");
                     size = scanner.nextInt();
-                }
+                } while (size > 11 || size < 4);
                 System.out.println("What should be the symbol for touched fields");
                 touched = scanner.next().charAt(0);
                 System.out.println("What should be the symbol for sunken ships fields");
@@ -70,7 +68,6 @@ public class Main {
     }
 
     public static void placeShips(int[][] board){
-        int size = board.length;
         placeShip(board, 3, false);
         placeShip(board, 3, true);
         placeShip(board, 2, false);
