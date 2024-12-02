@@ -8,6 +8,6 @@ public class OnePlayerGame {
         board = new int[size][size];
         displayedBoard = new char[size][size];
         Main.initializeBoard(size, board, displayedBoard, water);
-        Main.displayBoard(displayedBoard);
+        Main.placeShips(board);
     }
 }

@@ -1,3 +1,6 @@
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.Random;
 import java.util.Scanner;
 
 public class Main {
@@ -58,12 +61,77 @@ public class Main {
     }
 
     public static void displayBoard(char[][] board) {
-        for (int i = 0; i < board.length; i++) {
-            for (int j = 0; j < board[i].length; j++) {
-                System.out.print(board[i][j] + " ");
+        for (char[] chars : board) {
+            for (char aChar : chars) {
+                System.out.print(aChar + " ");
             }
             System.out.println();
         }
     }
+
+    public static void placeShips(int[][] board){
+        int size = board.length;
+        placeShip(board, 3, false);
+        placeShip(board, 3, true);
+        placeShip(board, 2, false);
+        placeShip(board, 2, true);
+//        for (int[] row : board) {
+//            for (int field : row) {
+//                System.out.print(field + " ");
+//            }
+//            System.out.println();
+//        }
+//        System.out.println();
+    }
+
+    private static void placeShip(int[][] board, int shipSize, boolean isVertical) {
+        ArrayList<Point> validCoordinates = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                if( checkShipPosition(i, j, board, shipSize, isVertical)) {
+                    validCoordinates.add(new Point(i, j));
+                }
+            }
+        }
+        Random rand = new Random();
+        int randomIndex = rand.nextInt(validCoordinates.size());
+        Point shipCoordinate = validCoordinates.get(randomIndex);
+        for (int i = 0; i < shipSize; i++) {
+            int placeX = isVertical ? shipCoordinate.x + i : shipCoordinate.x;
+            int placeY = isVertical ? shipCoordinate.y : shipCoordinate.y + i;
+
+            // Mark the cell as occupied (using a value like 1 to represent the ship)
+            board[placeX][placeY] = 1;
+        }
+
+    }
+
+    private static boolean checkShipPosition(int x, int y, int[][] board, int shipSize, boolean isVertical) {
+
+        int size = board.length;
+
+        if (isVertical) {
+            if (x + shipSize > size) {
+                return false;
+            }
+        } else {
+            if (y + shipSize > size) {
+                return false;
+            }
+        }
+
+        for (int i = 0; i < shipSize; i++) {
+            int checkX = isVertical ? x + i : x;
+            int checkY = isVertical ? y : y + i;
+
+            if (board[checkX][checkY] != 0) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+
 
 }

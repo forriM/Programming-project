@@ -11,6 +11,7 @@ public class TwoPlayerGame {
         displayedBoard2 = new char[size][size];
         Main.initializeBoard(size, board1, displayedBoard1, water);
         Main.initializeBoard(size, board2, displayedBoard2, water);
-        Main.displayBoard(displayedBoard1);
+        Main.placeShips(board1);
+        Main.placeShips(board2);
     }
 }
