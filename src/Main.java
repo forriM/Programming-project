@@ -156,15 +156,15 @@ public static void playGame(Scanner scanner, int[][] board1, int[][] board2, cha
 
     while (gameOn) {
         // Determine which player is playing
-        char[][] currentDisplayedBoard = player1Turn ? displayedBoard2 : displayedBoard1;
+        char[][] currentDisplay = player1Turn ? displayedBoard2 : displayedBoard1;
         int[][] currentBoard = player1Turn ? board2 : board1;
-        System.out.println("Player " + (player1Turn ? "1" : "2") + "'s turn!");
+        System.out.println("Player " + (player1Turn ? "1" : "2") + "'s turn:");
 
         // Display the board
-        displayBoard(currentDisplayedBoard);
+        displayBoard(currentDisplay);
 
         // Get the player's shot
-        System.out.println("Enter the row and column to attack (e.g., '3 4'):");
+        System.out.println("Enter coordinates to attack (row and column):");
         int row = scanner.nextInt();
         int col = scanner.nextInt();
 
@@ -174,68 +174,52 @@ public static void playGame(Scanner scanner, int[][] board1, int[][] board2, cha
             continue;
         }
 
-        // Process the shot
+        // Process the attack
         if (currentBoard[row][col] == 1) {
-            // Hit
+            
             System.out.println("Hit!");
-            currentDisplayedBoard[row][col] = touched;
-            currentBoard[row][col] = 0; // Mark as hit
+            currentDisplay[row][col] = touched;
+            currentBoard[row][col] = 0; 
         } else {
-            // Miss
+            
             System.out.println("Miss!");
-            currentDisplayedBoard[row][col] = water;
+            currentDisplay[row][col] = water;
         }
 
         // Check for victory
         if (isBoardCleared(currentBoard)) {
             System.out.println("Player " + (player1Turn ? "1" : "2") + " wins!");
-            gameOn = false; // End the game
+            gameOn = false; 
         }
 
         // Switch turns
         player1Turn = !player1Turn;
 
-        // If single-player mode, AI takes its turn
-        if (players == 1 && !player1Turn) {
-            aiTurn(board1, displayedBoard1);
-            player1Turn = true;
+        // If single-player mode, skip second board Logic
+        if (players == 1) {
+            gameOn = false;//End game in one-player mode
         }
     }
 }
 
-// Check if all ships on a board are sunk
-public static boolean isBoardCleared(int[][] board) {
+private static boolean isBoardCleared(int[][] board) {
     for (int[] row : board) {
         for (int cell : row) {
-            if (cell == 1) {
-                return false; // A ship is still alive
+            if (cell == 1) return false;
+
             }
         }
-    }
+    
     return true;
 }
-
-// Simple AI turn logic for 1-player mode
-public static void aiTurn(int[][] board, char[][] displayedBoard) {
-    Random random = new Random();
-    int row, col;
-
-    do {
-        row = random.nextInt(size);
-        col = random.nextInt(size);
-    } while (displayedBoard[row][col] != water); // Avoid already attacked spots
-
-    System.out.println("AI attacks row " + row + ", column " + col);
-
-    if (board[row][col] == 1) {
-        System.out.println("AI hits your ship!");
-        displayedBoard[row][col] = touched;
-        board[row][col] = 0; // Mark as hit
-    } else {
-        System.out.println("AI misses.");
-        displayedBoard[row][col] = water;
+private static void displayBoard(char[][] board) {
+    for (char[] row : board) {
+        for (char cell : row) {
+            System.out.print(cell + " ");
+        }
+        System.out.println();
     }
 }
-
-
 }
+
+   
