@@ -4,26 +4,27 @@ import java.util.Random;
 import java.util.Scanner;
 
 public class Main {
-	
-	//Symbols for different board elements and game configuration parameters
+
+    //Symbols for different board elements and game configuration parameters
     static char touched = '#';
     static char sunken = 'X';
     static char water = '0';
     static int size = 5;
     static int players = 1;
+
     public static void main(String[] args) {
-    	
-    	//Input handling for game configuration
+
+        //Input handling for game configuration
         Scanner scanner = new Scanner(System.in);
         String mode;
-        
+
         //Ask the user to choose a game mode
         do {
             System.out.println("Which mode do you want to play?(basic/advanced)");
             mode = scanner.nextLine();
-            if(mode.equals("advanced")) {
-            	
-            	//Advanced mode allows customization of board, size and symbols
+            if (mode.equals("advanced")) {
+
+                //Advanced mode allows customization of board, size and symbols
                 do {
                     System.out.println("What size of board?");
                     size = scanner.nextInt();
@@ -37,80 +38,96 @@ public class Main {
                 do {
                     System.out.println("2 player or 1 player mode(1/2)");
                     players = scanner.nextInt();
-                } while (players>2 || players<1);
+                } while (players > 2 || players < 1);
             }
         } while (!(mode.equals("basic") || mode.equals("advanced")));
-        
-        //Start the game based on the number of players
-        if(players==1){
-            OnePlayerGame.play(touched, sunken, water, size);
-        } else if(players==2){
-            TwoPlayerGame.play(touched, sunken, water, size);
-        } else {
-            System.out.println("player number invalid");
-        }
+
+
+        int[][] board1 = new int[size][size];
+        int[][] board2 = new int[size][size];
+        char[][] displayedBoard1 = new char[size][size];
+        char[][] displayedBoard2 = new char[size][size];
+        initializeBoard(size, board1, displayedBoard1);
+        initializeBoard(size, board2, displayedBoard2);
+        placeShips(board1);
+        placeShips(board2);
+        playGame(scanner, board1, board2, displayedBoard1, displayedBoard2, players);
 
     }
-    
+
     //Method to initialize the board with water
     public static void initializeBoard(
             int size,
-            int [][] board,
-            char [][] displayedBoard,
-            char water)
-    {
+            int[][] board,
+            char[][] displayedBoard) {
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 board[i][j] = 0;
-                displayedBoard[i][j] = water;
+                displayedBoard[i][j] = ' ';
             }
         }
     }
 
     //Method to display the board to the console
-    public static void displayBoard(char[][] board) {
-        for (char[] chars : board) {
-            for (char aChar : chars) {
-                System.out.print(aChar + " ");
-            }
-            System.out.println();
+    public static void displayBoard(char[][] board, int sunkenShips) {
+        int shotCount = 0;
+        // Print the column headers (A, B, C, ...)
+        System.out.print("   "); // Padding for row numbers
+        for (int col = 0; col < board[0].length; col++) {
+            System.out.print((char) ('A' + col) + " ");
         }
+        System.out.println();
+
+        // Print the board with row numbers
+        for (int row = 0; row < board.length; row++) {
+            System.out.print(row + " "); // Row number
+            for (int col = 0; col < board[row].length; col++) {
+                System.out.print("|" + board[row][col]);
+                if(board[row][col] != ' ') shotCount++;
+            }
+            System.out.println("|"); // Close the row
+        }
+        System.out.println("Shots fired: " + shotCount);
+        System.out.println("Ships sunk: " + sunkenShips);
     }
 
     //Place all ships on the board
-    public static void placeShips(int[][] board){
-        placeShip(board, 3, false);
-        placeShip(board, 3, true);
-        placeShip(board, 2, false);
-        placeShip(board, 2, true);
-//        for (int[] row : board) {
-//            for (int field : row) {
-//                System.out.print(field + " ");
-//            }
-//            System.out.println();
-//        }
-//        System.out.println();
+    public static void placeShips(int[][] board) {
+        placeShip(board, 3, false, 2);
+        placeShip(board, 3, true, 3);
+        placeShip(board, 2, false, 4);
+        placeShip(board, 2, true, 5);
+        for (int[] row : board) {
+            for (int field : row) {
+                System.out.print(field + " ");
+            }
+            System.out.println();
+        }
+        System.out.println();
     }
 
-    private static void placeShip(int[][] board, int shipSize, boolean isVertical) {
+    private static void placeShip(int[][] board, int shipSize, boolean isVertical, int shipId) {
         ArrayList<Point> validCoordinates = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                if( checkShipPosition(i, j, board, shipSize, isVertical)) {
+                if (checkShipPosition(i, j, board, shipSize, isVertical)) {
                     validCoordinates.add(new Point(i, j));
                 }
             }
         }
+
         Random rand = new Random();
         int randomIndex = rand.nextInt(validCoordinates.size());
         Point shipCoordinate = validCoordinates.get(randomIndex);
+
         for (int i = 0; i < shipSize; i++) {
             int placeX = isVertical ? shipCoordinate.x + i : shipCoordinate.x;
             int placeY = isVertical ? shipCoordinate.y : shipCoordinate.y + i;
 
-            // Mark the cell as occupied (using a value like 1 to represent the ship)
-            board[placeX][placeY] = 1;
+            // Assign a unique value to the ship
+            board[placeX][placeY] = shipId;
         }
+
 
     }
 
@@ -139,87 +156,110 @@ public class Main {
 
         return true;
     }
- // Start the game
-    int[][] board1 = new int[size][size];
-    int[][] board2 = new int[size][size]; 
-    char[][] displayedBoard1 = new char[size][size];
-    char[][] displayedBoard2 = new char[size][size];
-    initializeBoard(size, board1, displayedBoard1, water);
-    initializeBoard(size, board2, displayedBoard2, water);
-    playGame(scanner, board1, board2, displayedBoard1, displayedBoard2, players);
-}
+    // Start the game
 
-// Game loop for playing the game
-public static void playGame(Scanner scanner, int[][] board1, int[][] board2, char[][] displayedBoard1, char[][] displayedBoard2, int players) {
-    boolean gameOn = true; 
-    boolean player1Turn = true; 
 
-    while (gameOn) {
-        // Determine which player is playing
-        char[][] currentDisplay = player1Turn ? displayedBoard2 : displayedBoard1;
-        int[][] currentBoard = player1Turn ? board2 : board1;
-        System.out.println("Player " + (player1Turn ? "1" : "2") + "'s turn:");
+    // Game loop for playing the game
+    public static void playGame(Scanner scanner, int[][] board1, int[][] board2, char[][] displayedBoard1, char[][] displayedBoard2, int players) {
+        boolean gameOn = true;
+        boolean player1Turn = true;
+        int sunkShips1 = 0;
+        int sunkShips2 = 0;
 
-        // Display the board
-        displayBoard(currentDisplay);
+        while (gameOn) {
+            // Determine which player is playing
+            char[][] currentDisplay = player1Turn ? displayedBoard2 : displayedBoard1;
+            int[][] currentBoard = player1Turn ? board2 : board1;
 
-        // Get the player's shot
-        System.out.println("Enter coordinates to attack (row and column):");
-        int row = scanner.nextInt();
-        int col = scanner.nextInt();
+            System.out.println("Player " + (player1Turn ? "1" : "2") + "'s turn:");
 
-        // Validate input
-        if (row < 0 || row >= size || col < 0 || col >= size) {
-            System.out.println("Invalid coordinates. Try again.");
-            continue;
-        }
+            // Display the board
+            displayBoard(currentDisplay, player1Turn ? sunkShips1 : sunkShips2);
 
-        // Process the attack
-        if (currentBoard[row][col] == 1) {
-            
-            System.out.println("Hit!");
-            currentDisplay[row][col] = touched;
-            currentBoard[row][col] = 0; 
-        } else {
-            
-            System.out.println("Miss!");
-            currentDisplay[row][col] = water;
-        }
+            // Get the player's shot
+            System.out.println("Insert the coordinates:");
+            String coordinates = scanner.nextLine();
+            coordinates = coordinates.replace("(", "").replace(")", "");
+            String[] parts = coordinates.split(",");
+            int row;
+            int col;
+            if (parts.length == 2) {
+                try {
+                    row = Integer.parseInt(parts[0].trim());
+                    col = Integer.parseInt(parts[1].trim());
+                } catch (NumberFormatException e) {
+                    System.out.println("The coordinates are not valid.");
+                    continue;
+                }
+            } else {
+                System.out.println("The coordinates are not valid");
+                continue;
+            }
 
-        // Check for victory
-        if (isBoardCleared(currentBoard)) {
-            System.out.println("Player " + (player1Turn ? "1" : "2") + " wins!");
-            gameOn = false; 
-        }
 
-        // Switch turns
-        player1Turn = !player1Turn;
+            // Validate input
+            if (row < 0 || row >= size || col < 0 || col >= size) {
+                System.out.println("Invalid coordinates. Try again.");
+                continue;
+            }
 
-        // If single-player mode, skip second board Logic
-        if (players == 1) {
-            gameOn = false;//End game in one-player mode
+            // Process the attack
+            if (currentBoard[row][col] > 1) {
+                int shipId = currentBoard[row][col]; // Get the ship's unique ID
+                currentDisplay[row][col] = touched; // Mark as touched
+
+
+                // Check if the ship is sunk
+                if (isShipSunk(currentBoard, currentDisplay, shipId, touched, sunken)) {
+                    if(player1Turn) sunkShips1++;
+                    else sunkShips2++;
+                }
+            } else {
+                currentDisplay[row][col] = water;
+            }
+
+
+            // Check for victory
+            if (sunkShips1 == 4 || sunkShips2 == 4) {
+                displayBoard(currentDisplay, player1Turn ? sunkShips1 : sunkShips2);
+                System.out.println("The game is over! ");
+                gameOn = false;
+            }
+
+            // Switch turns
+            player1Turn = players <= 1 || !player1Turn;
+
+
         }
     }
-}
 
-private static boolean isBoardCleared(int[][] board) {
-    for (int[] row : board) {
-        for (int cell : row) {
-            if (cell == 1) return false;
+    private static boolean isShipSunk(int[][] board, char[][] displayBoard, int shipId, char touchedSymbol, char sunkenSymbol) {
+        boolean isSunk = true;
 
+        // First, check if all parts of the ship with `shipId` are hit
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board[i].length; j++) {
+                if (board[i][j] == shipId && displayBoard[i][j] != touchedSymbol ) {
+                    isSunk = false;
+
+                }
             }
         }
-    
-    return true;
-}
-private static void displayBoard(char[][] board) {
-    for (char[] row : board) {
-        for (char cell : row) {
-            System.out.print(cell + " ");
+
+        // If the ship is sunk, update all its cells on the display board to the `sunkenSymbol`
+        if (isSunk) {
+            for (int i = 0; i < board.length; i++) {
+                for (int j = 0; j < board[i].length; j++) {
+                    if (displayBoard[i][j] == touchedSymbol && board[i][j] == shipId) {
+                        displayBoard[i][j] = sunkenSymbol; // Update the sunk ship's cells
+                    }
+                }
+            }
         }
-        System.out.println();
+
+        return isSunk;
     }
-}
+
 }
 
    
